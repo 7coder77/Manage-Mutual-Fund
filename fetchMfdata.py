@@ -1,47 +1,63 @@
+from fastapi import FastAPI, Query, HTTPException
 import requests
 
-def get_nav(fund_name, starts_with=False):
+app = FastAPI()
+
+def fetch_amfi_data():
+    """
+    Fetch the latest mutual fund data from AMFI.
+    Returns the data as a list of lines from the `NAVAll.txt` file.
+    """
     url = "https://www.amfiindia.com/spages/NAVAll.txt"
     try:
-        # Fetch the NAV data
         response = requests.get(url)
-        if response.status_code != 200:
-            return {"error": "Failed to fetch NAV data"}
-        
-        # Split data into lines
-        data = response.text.split("\n")
-
-        # Write the data to a file (optional)
-        with open("NAV.txt", "w") as f:
-            f.write("\n".join(data))
-        
-        # Search for funds
-        results = []
-        for line in data:
-            details = line.split(";")
-            if len(details) < 5:
-                continue  # Skip incomplete lines
-            fund_name_in_line = details[3].strip().lower()
-            
-            if starts_with:
-                if fund_name_in_line.startswith(fund_name.lower()):
-                    results.append({"Fund Code": details[0], "Fund Name": details[3], "NAV": details[4]})
-            else:
-                if fund_name.lower() in fund_name_in_line:
-                    return {"Fund Code": details[0], "Fund Name": details[3], "NAV": details[4]}
-        
-        # Return results based on search type
-        if starts_with:
-            return results if results else {"error": "No funds found starting with the given string"}
+        if response.status_code == 200:
+            return response.text.split("\n")
         else:
-            return {"error": "Fund not found"}
-
+            raise Exception("Failed to fetch AMFI data")
     except Exception as e:
-        return {"error": str(e)}
+        return str(e)
 
-# Search for funds starting with a specific string
-prefix = "edelweiss mid cap"
-starting_nav_data = get_nav(prefix, starts_with=True)
-print("\nFunds Starting with Prefix:")
-for fund in starting_nav_data:
-    print(f"Fund Code: {fund['Fund Code']}, Name: {fund['Fund Name']}, NAV: {fund['NAV']}")
+def search_funds(fund_name: str):
+    """
+    Search for mutual funds containing the given fund name.
+    Args:
+        fund_name (str): The name or part of the name to search for.
+    Returns:
+        List of matching funds or an error message.
+    """
+    data = fetch_amfi_data()
+    if isinstance(data, str):  # If fetch_amfi_data returned an error
+        return {"error": data}
+    
+    results = []
+    for line in data:
+        details = line.split(";")
+        if len(details) >= 5 and fund_name.lower() in details[3].lower():
+            results.append({
+                "Fund Code": details[0],
+                "Fund Name": details[3],
+                "NAV": details[4]
+            })
+    return results
+
+@app.get("/search_fund")
+async def search_fund(fund_name: str = Query(..., description="The name or part of the name of the mutual fund to search for")):
+    """
+    API endpoint to search for mutual funds by name.
+    Args:
+        fund_name (str): Query parameter for the mutual fund name.
+    Returns:
+        A list of matching funds or an error message.
+    """
+    if not fund_name:
+        raise HTTPException(status_code=400, detail="Fund name parameter is required")
+    
+    results = search_funds(fund_name)
+    if "error" in results:
+        raise HTTPException(status_code=500, detail=results["error"])
+    
+    if not results:
+        raise HTTPException(status_code=404, detail="No matching funds found")
+
+    return {"results": results}
