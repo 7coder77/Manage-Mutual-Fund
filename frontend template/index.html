@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MutualFund Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h2>MutualFund Tracker</h2>
+            </div>
+            <ul class="navbar-nav">
+                <li><button class="nav-link active" data-view="dashboard">Dashboard</button></li>
+                <li><button class="nav-link" data-view="add-investment">Add Investment</button></li>
+                <li><button class="nav-link" data-view="portfolio">My Portfolio</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Dashboard View -->
+            <section id="dashboard-view" class="view active">
+                <div class="dashboard-header">
+                    <h1>Portfolio Dashboard</h1>
+                    <p class="dashboard-subtitle">Track your mutual fund investments and performance</p>
+                </div>
+
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon success">₹</div>
+                        <div class="stat-content">
+                            <h3 id="total-invested">₹0</h3>
+                            <p>Total Invested</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon primary">📈</div>
+                        <div class="stat-content">
+                            <h3 id="current-value">₹0</h3>
+                            <p>Current Value</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" id="profit-loss-icon">📊</div>
+                        <div class="stat-content">
+                            <h3 id="profit-loss">₹0</h3>
+                            <p>Profit/Loss (<span id="profit-loss-percent">0%</span>)</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon info">#</div>
+                        <div class="stat-content">
+                            <h3 id="total-investments">0</h3>
+                            <p>Total Investments</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-transactions">
+                    <h3>Recent Investments</h3>
+                    <div id="recent-investments-list" class="investments-preview">
+                        <!-- Recent investments will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Investment View -->
+            <section id="add-investment-view" class="view">
+                <div class="form-header">
+                    <h1>Add New Investment</h1>
+                    <p>Enter details of your mutual fund investment</p>
+                </div>
+
+                <div class="form-container">
+                    <form id="add-investment-form" class="investment-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="fund-search">Search Mutual Fund</label>
+                                <div class="search-container">
+                                    <input type="text" id="fund-search" class="form-control" placeholder="Search for mutual fund..." autocomplete="off">
+                                    <div id="fund-suggestions" class="suggestions-dropdown hidden"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="fund-code">Fund Code</label>
+                                <input type="text" id="fund-code" class="form-control" placeholder="Fund code" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="amount-invested">Amount Invested (₹)</label>
+                                <input type="number" id="amount-invested" class="form-control" placeholder="Enter amount" min="1" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="purchase-date">Purchase Date</label>
+                                <input type="date" id="purchase-date" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="purchase-nav">Purchase NAV (₹)</label>
+                                <input type="number" id="purchase-nav" class="form-control" placeholder="NAV per unit" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="units-allotted">Units Allotted</label>
+                                <input type="number" id="units-allotted" class="form-control" placeholder="Units" min="0.001" step="0.001" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn--secondary" id="clear-form">Clear</button>
+                            <button type="submit" class="btn btn--primary">Add Investment</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Portfolio View -->
+            <section id="portfolio-view" class="view">
+                <div class="portfolio-header">
+                    <h1>My Portfolio</h1>
+                    <div class="portfolio-controls">
+                        <div class="search-filter">
+                            <input type="text" id="portfolio-search" class="form-control" placeholder="Search investments...">
+                            <select id="portfolio-filter" class="form-control">
+                                <option value="all">All Investments</option>
+                                <option value="profit">Profitable</option>
+                                <option value="loss">In Loss</option>
+                                <option value="equity">Equity Funds</option>
+                                <option value="hybrid">Hybrid Funds</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="portfolio-summary">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h4>Best Performer</h4>
+                            <p id="best-performer">-</p>
+                            <span id="best-performer-return" class="status status--success">-</span>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Worst Performer</h4>
+                            <p id="worst-performer">-</p>
+                            <span id="worst-performer-return" class="status status--error">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="investments-container">
+                    <div id="investments-list" class="investments-grid">
+                        <!-- Investment cards will be populated here -->
+                    </div>
+                    <div id="no-investments" class="empty-state hidden">
+                        <h3>No investments found</h3>
+                        <p>Start building your portfolio by adding your first investment.</p>
+                        <button class="btn btn--primary" data-view="add-investment">Add Investment</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Edit Investment Modal -->
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Investment</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-investment-form">
+                    <input type="hidden" id="edit-investment-id">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-fund-name">Fund Name</label>
+                        <input type="text" id="edit-fund-name" class="form-control" readonly>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="edit-amount-invested">Amount Invested (₹)</label>
+                            <input type="number" id="edit-amount-invested" class="form-control" min="1" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="edit-purchase-nav">Purchase NAV (₹)</label>
+                            <input type="number" id="edit-purchase-nav" class="form-control" min="0.01" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-purchase-date">Purchase Date</label>
+                        <input type="date" id="edit-purchase-date" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" id="cancel-edit">Cancel</button>
+                <button class="btn btn--primary" id="save-edit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html> 
