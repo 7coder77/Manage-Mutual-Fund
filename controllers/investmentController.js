@@ -1,7 +1,7 @@
 const Investment = require('../models/Investment');
 const { fetchNAVData } = require('../services/mutualFundService');
 
-// GET /api/investments
+// GET /api/investments/
 exports.getAllInvestments = async (req, res) => {
   try {
     const investments = await Investment.find({});
@@ -19,7 +19,7 @@ exports.getAllInvestments = async (req, res) => {
   }
 };
 
-// POST /api/investments
+// POST /api/investments/
 exports.addInvestment = async (req, res) => {
   try {
     const { fundName, fundCode, amountInvested, purchaseNAV, purchaseDate } = req.body;
@@ -36,7 +36,7 @@ exports.addInvestment = async (req, res) => {
       currentNAV: navData?.nav || purchaseNAV,
       purchaseDate
     });
-
+    console.log('Creating investment:', investment);
     await investment.save();
     res.status(201).json(investment);
   } catch (err) {

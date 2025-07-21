@@ -1,5 +1,5 @@
 const axios = require('axios');
-const BASE_URL = 'https://api.mfapi.in/mf';
+const BASE_URL = 'https://api.mfapi.in/mf';//text file return
 
 exports.fetchNAVData = async (fundCode) => {
   try {
